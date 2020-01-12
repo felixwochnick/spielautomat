@@ -1,2 +1,2 @@
 # spielautomat
-Schulprojekt
+> Schulprojekt
