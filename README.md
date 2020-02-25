@@ -8,7 +8,7 @@ Benötigte Bibliotheken: pygame
 ### Starten
 
 Diese Befehle sind Unix/Bash Befehle.
-Es ist nicht garantiert, dass sie auf Betriebssystemen von Microsoft funtionieren.
+Es ist nicht garantiert, dass sie auf Betriebssystemen von Microsoft funktionieren.
 
 ```bash
 python main.py
