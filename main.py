@@ -60,23 +60,36 @@ def getColor(colorName: str):
 
 
 class Window:
-    def __init__(self, windowSize=[800, 600]):
+    def __init__(self, monney=30, windowSize=[800, 600]):
         pygame.init()
         self.__windowSize = windowSize
         self.__screen = pygame.display.set_mode(self.__windowSize)
         self.__font = pygame.font.SysFont(None, 30)
 
         # standard text
-        self.__NOWIN = 'Kein Gewinn:       0€      '
-        self.__LWIN = 'Kleiner Gewinn:    2€      '
-        self.__BWIN = 'Großer Gewinn:     4€      '
+        self.__EMPTYWIN  = '                                                    '
+        self.__NOWIN     = 'Kein Gewinn:       +0€      '
+        self.__LWIN      = 'Kleiner Gewinn:    +2€      '
+        self.__BWIN      = 'Großer Gewinn:     +4€      '
+        self.__NOMONNEY  = 'Du hast kein Geld mehr!     '
+
+        self.__SUM       = monney
+        self.__SUM_RESET = monney
+        self.__TEXT_SUM  = f'Gesamter Gewinn:    {self.__SUM}€     '
 
         self.__build()
 
     def __build(self):
         self.automat = Automat(self.__screen)
-        self.text = TextField(self.__screen, self.__font, 10, 15, self.__NOWIN)
+        self.text = TextField(self.__screen, self.__font, 10, 15, self.__EMPTYWIN)
+        self.textSUM = TextField(self.__screen, self.__font, 10, 55, self.__TEXT_SUM)
         self.btn = Button(self.__screen, self.__font, 400, 10, text="Spielen")
+        self.btnReset = Button(self.__screen, self.__font, 400, 50, text="Reset")
+
+    def reset(self):
+        self.__SUM = self.__SUM_RESET
+        self.text.update(self.__EMPTYWIN)
+        self.textSUM.update(f'Gesamter Gewinn:    {self.__SUM}€     ')
 
     def mainLoop(self):
         while True:
@@ -86,18 +99,34 @@ class Window:
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     mousePosX, mousePosY = pygame.mouse.get_pos()
+                    # Mouse on btn
                     if (
                         mousePosX > self.btn.getPosition()[0] and mousePosX < (self.btn.getPosition()[0] + self.btn.getPosition()[2])
                     ) and (
                         mousePosY > self.btn.getPosition()[1] and mousePosY < (self.btn.getPosition()[1] + self.btn.getPosition()[3])
                     ):
-                        win = self.automat.play()
-                        if win == 0:
-                            self.text.update(self.__NOWIN)
-                        elif win == 1:
-                            self.text.update(self.__LWIN)
-                        elif win == 2:
-                            self.text.update(self.__BWIN)
+                        if self.__SUM >= 2:
+                            self.__SUM -= 2
+                            win = self.automat.play()
+                            if win == 0:
+                                self.text.update(self.__NOWIN)
+                            elif win == 1:
+                                self.text.update(self.__LWIN)
+                                self.__SUM += 2
+                            elif win == 2:
+                                self.text.update(self.__BWIN)
+                                self.__SUM += 4
+                            self.textSUM.update(f'Gesamter Gewinn:    {self.__SUM}€     ')
+                        else:
+                            self.text.update(self.__NOMONNEY)
+
+                    # Mouse on btnReset
+                    if (
+                        mousePosX > self.btnReset.getPosition()[0] and mousePosX < (self.btnReset.getPosition()[0] + self.btnReset.getPosition()[2])
+                    ) and (
+                        mousePosY > self.btnReset.getPosition()[1] and mousePosY < (self.btnReset.getPosition()[1] + self.btnReset.getPosition()[3])
+                    ):
+                        self.reset()
 
 
 class Border:
@@ -253,5 +282,9 @@ class Button:
 
 
 if __name__ == '__main__':
-    window = Window([510, 300])
+    if len(sys.argv) > 1:
+        print(type(int(sys.argv[1])))
+        window = Window(monney=int(sys.argv[1]), windowSize=[510, 300])
+    else:
+        window = Window(windowSize=[510, 300])
     window.mainLoop()
